@@ -1,9 +1,11 @@
 package com.anncode.offersandcoupons
 
 /*
-*
+* MODEL
 *
 * MainActivity.kt
+*
+* VIEW CONTROLLER
 val rvCoupons: RecyclerView = findViewById(R.id.rvCoupons)
 rvCoupons.layoutManager = LinearLayoutManager(this)
 val coupons = ArrayList<Coupon>()
@@ -30,7 +32,9 @@ call.enqueue(object : Callback<JsonObject> {
 
 
 })
+// VIEW - CONTROLLER
 
+// Network Resourse MODEL
 
 val apiKey = "69d1837829128f9565368ca704c63207"
 val urlApi = "http://feed.linkmydeals.com/"
@@ -62,6 +66,7 @@ fun getClientService(): ApiService {
     return  retrofit.create(ApiService::class.java)
 }
 
+// MODEL
 interface ApiService {
     @GET("getOffers/")
     fun getCoupons(): Call<JsonObject>
@@ -101,5 +106,5 @@ CouponDetailActivity.java
             openURL.data = Uri.parse(couponSelected?.url)
             startActivity(openURL)
         }
-
+// VIEW - CONTROLLER
 * */
