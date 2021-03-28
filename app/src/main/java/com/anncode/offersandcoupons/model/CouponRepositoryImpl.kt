@@ -1,31 +1,22 @@
-package com.anncode.offersandcoupons
+package com.anncode.offersandcoupons.model
 
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
+import com.anncode.offersandcoupons.R
+import com.anncode.offersandcoupons.presenter.CouponPresenter
+import com.anncode.offersandcoupons.view.RecyclerCouponsAdapter
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import com.anncode.offersandcoupons.model.ApiAdapter
 
-class MainActivity : AppCompatActivity() {
+class CouponRepositoryImpl(var couponPresenter: CouponPresenter): CouponRepository {
+    //TODA LA LÓGICA DE CONEXIÓN
+    override fun getCouponsAPI() {
+        TODO("Not yet implemented")
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        supportActionBar?.hide()
-
-        // START VIEW
-        val rvCoupons: RecyclerView = findViewById(R.id.rvCoupons)
-        rvCoupons.layoutManager = LinearLayoutManager(this)
-        val coupons = ArrayList<Coupon>()
-        // END VIEW
-
-        // START CONTROLLER
+        // CONTROLLER
+        var coupons: ArrayList<Coupon>? = ArrayList<Coupon>() // nuevo
         val apiAdapter = ApiAdapter()
         val apiService = apiAdapter.getClientService()
         val call = apiService.getCoupons()
@@ -41,14 +32,19 @@ class MainActivity : AppCompatActivity() {
                 offersJsonArray?.forEach { jsonElement: JsonElement ->
                     var jsonObject = jsonElement.asJsonObject
                     var coupon = Coupon(jsonObject)
-                    coupons.add(coupon)
+                    coupons?.add(coupon) // tenemos que agregar "?" por la definicion de arriba
                 }
                 // VIEW
-                rvCoupons.adapter = RecyclerCouponsAdapter(coupons, R.layout.card_coupon)
+                // esto no lo necesitamos porque lo vamos a hacer con nuestro presentador
+                //rvCoupons.adapter = RecyclerCouponsAdapter(coupons, R.layout.card_coupon)
+
+                couponPresenter.showCoupons(coupons)
                 // VIEW
             }
 
         })
-        // END CONTROLLER
+
+        // Vamos a poder comunicarnos a la interfaz gracias a ese prenseter
+        //couponPresenter.showCoupons()
     }
 }
