@@ -1,87 +1,98 @@
 package com.anncode.offersandcoupons.view
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
-import com.anncode.offersandcoupons.model.Coupon
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+/*import android.util.Log*/
+//import com.anncode.offersandcoupons.model.Coupon
 import com.anncode.offersandcoupons.R
-import com.google.gson.JsonElement
+import com.anncode.offersandcoupons.databinding.ActivityMainBinding
+import com.anncode.offersandcoupons.model.Coupon
+import com.anncode.offersandcoupons.viewmodel.CouponViewModel
+
+/*import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.anncode.offersandcoupons.model.ApiAdapter
 import com.anncode.offersandcoupons.presenter.CouponPresenter
-import com.anncode.offersandcoupons.presenter.CouponPresenterImpl
+import com.anncode.offersandcoupons.presenter.CouponPresenterImpl*/
 
-class MainActivity : AppCompatActivity(), CouponView {
+//, CouponView
+class MainActivity : AppCompatActivity() {
+
+    private var couponViewModel: CouponViewModel? = null
 
     // lo inicializamos en null con el null safely de kotlin con el signo ?
-    private var couponPresenter: CouponPresenter? = null
-    private var rvCoupons: RecyclerView? = null
+    //private var couponPresenter: CouponPresenter? = null // el código comentado es del MVP
+    private var rvCoupons: androidx.recyclerview.widget.RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.hide()
 
-        couponPresenter = CouponPresenterImpl(this)
+        setUpBindings(savedInstanceState)
+
+        //couponPresenter = CouponPresenterImpl(this)
 
         // START VIEW
-        rvCoupons = findViewById(R.id.rvCoupons)
+        //rvCoupons = findViewById(R.id.rvCoupons) // no utilizamos más findViewById
 
         //debemos poner el signo interrogativo ? porque arriba esta definido como null
-        rvCoupons?.layoutManager = LinearLayoutManager(this)
+        //esto no lo vamos a hacer de esta forma
+        /*rvCoupons?.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(this)*/
+
+        //callCoupons
+        //getCoupons - Lista de cupones
 
         // Llamada para traer los cupones, es el método implementado más abajo
         // Empieza llamando al presentador
-        getCoupons()
-
-        //val coupons = ArrayList<Coupon>()
-        // END VIEW
-
-        // START CONTROLLER
-        // esto se fue para el modelo a CouponRepository
-        /*val apiAdapter = ApiAdapter()
-        val apiService = apiAdapter.getClientService()
-        val call = apiService.getCoupons()
-
-        call.enqueue(object : Callback<JsonObject> {
-            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                Log.e("ERROR: ", t.message)
-                t.stackTrace
-            }
-
-            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                val offersJsonArray = response.body()?.getAsJsonArray("offers")
-                offersJsonArray?.forEach { jsonElement: JsonElement ->
-                    var jsonObject = jsonElement.asJsonObject
-                    var coupon = Coupon(jsonObject)
-                    coupons.add(coupon)
-                }
-                // VIEW
-                rvCoupons.adapter = RecyclerCouponsAdapter(coupons, R.layout.card_coupon)
-                // VIEW
-            }
-
-        })*/
-        // END CONTROLLER
+        //getCoupons()
     }
 
-    override fun showCoupons(coupons: ArrayList<Coupon>?) {
-        //operador double bang catcheamos una excepcion
-        try {
-            rvCoupons!!.adapter = RecyclerCouponsAdapter(coupons, R.layout.card_coupon)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    //ESTO DA ERROR PORQUE ELIMINAMOS LA INTERFACE couponview
+    /* override fun showCoupons(coupons: ArrayList<Coupon>?) {
+         //operador double bang catcheamos una excepcion
+         try {
+             rvCoupons!!.adapter = RecyclerCouponsAdapter(coupons, R.layout.card_coupon)
+         } catch (e: Exception) {
+             e.printStackTrace()
+         }
 
+     }
+
+     override fun getCoupons() {
+         //empieza llamando al presentador
+         //couponPresenter?.getCoupons()
+     }*/
+
+    // va a  poner en orbita el sistema de bnidee en accion empiece a funcionar todo lo que esta implementado
+    fun setUpBindings(savedInstanceState: Bundle?) {
+        //esta clase se crea automaticamente gracias al sistema de bindeo de android
+        var activityMainBinding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        couponViewModel = ViewModelProviders.of(this).get(CouponViewModel::class.java)
+
+        activityMainBinding.setModel(couponViewModel)
     }
 
-    override fun getCoupons() {
-        //empieza llamando al presentador
-        couponPresenter?.getCoupons()
+    //va a tener la logica de levantar la lista nuestro recycleview
+    fun setupListUpdate() {
+        //CallCoupons
+        couponViewModel?.callCoupons() //se rellena la lista
+
+        //getCoupons - Lista de cupones
+        couponViewModel?.getCoupons()?.observe(this, Observer { coupons: List<Coupon> ->
+            Log.w("COUPON", coupons.get(0).title)
+            couponViewModel?.setCouponsInRecyclerAdaper(coupons)
+        }) //me devuele la lista con supoer poderes
     }
 }
